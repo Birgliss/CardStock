@@ -1,6 +1,6 @@
 {
   "parent": "cardstock:builtin/card",
   "textures": {
-    "layer0": "retromc:item/card_biospheres"
+    "layer0": "retromc:item/industrialcraft"
   }
 }
