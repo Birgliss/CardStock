@@ -142,7 +142,7 @@ card "witchery" {
 }
 card "yttr" {
 	rarity 3
-	info text="Unascribed, Minecraft..." color="green" {
+	info text="unascribed, Minecraft..." color="green" {
 		- text="1.16.5" color="red"
 		- text="?" color="green"
 	}
