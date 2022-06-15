@@ -26,7 +26,7 @@ card "appliedenergistics" {
 }
 card "biosphere" {
 	rarity 5
-	info text="Risugami, Minecraft beta 1.6.2" color="green"
+	info text="Risugami, Minecraft Beta 1.6.2" color="green"
 	lore {
 		- translate="text.retromc.biosphere.1" color="gray"
 		- translate="text.retromc.biosphere.2" color="gray"
@@ -37,7 +37,7 @@ card "biosphere" {
 }
 card "industrialcraft" {
 	rarity 5
-	info text="Alblaka, Minecraft beta 1.7.3" color="green"
+	info text="Alblaka, Minecraft Beta 1.7.3" color="green"
 	lore {
 		- translate="text.retromc.industrialcraft.1" color="gray"
 		- translate="text.retromc.industrialcraft.2" color="gray"
@@ -62,7 +62,7 @@ card "redpower" {
 //had a quiet but long-lasting impact on modding
 card "beekeeping" {
 	rarity 4
-	info text="Nandonalt, Minecraft beta 1.7.3" color="green"
+	info text="Nandonalt, Minecraft Beta 1.7.3" color="green"
 	lore {
 		- translate="text.retromc.beekeeping.1" color="gray"
 		- translate="text.retromc.beekeeping.2" color="gray"

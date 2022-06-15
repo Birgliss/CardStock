@@ -1,6 +1,6 @@
 {
-  "parent": "cardstock:item/reverse_holofoil_card",
+  "parent": "cardstock:builtin/card",
   "textures": {
-    "art": "cardstock:item/card_missingno"
+    "art": "retromc:item/appliedenergistics"
   }
 }
