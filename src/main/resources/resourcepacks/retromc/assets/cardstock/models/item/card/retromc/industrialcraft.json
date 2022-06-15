@@ -1,6 +1,6 @@
 {
   "parent": "cardstock:builtin/card",
   "textures": {
-    "layer0": "retromc:item/industrialcraft"
+    "art": "retromc:item/industrialcraft"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "parent": "cardstock:builtin/card",
+  "parent": "cardstock:item/reverse_holofoil_card",
   "textures": {
-    "layer0": "retromc:item/card_biospheres"
+    "art": "cardstock:item/card_missingno"
   }
 }

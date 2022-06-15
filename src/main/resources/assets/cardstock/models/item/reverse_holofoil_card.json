@@ -1,0 +1,8 @@
+{
+  "parent": "cardstock:builtin/card",
+  "textures": {
+    "holo_center": "cardstock:item/card_rhf_center",
+    "holo_right": "cardstock:item/card_rhf_right",
+    "holo_left": "cardstock:item/card_rhf_left"
+  }
+}

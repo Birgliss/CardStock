@@ -12,14 +12,13 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.minecraft.loot.*;
 import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
+import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.profiler.Profiler;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -36,7 +35,6 @@ import java.util.Map;
 
 @Mixin(LootManager.class)
 public class MixinLootManager {
-	@Shadow @Final private static Logger LOGGER;
 	private static final KDLParser PARSER = new KDLParser();
 	private static final int PREFIX_LENGTH = "cardstock/".length();
 	private static final int SUFFIX_LENGTH = ".kdl".length();
@@ -45,30 +43,30 @@ public class MixinLootManager {
 	private void injectCardPackTables(Map<Identifier, JsonElement> jsons, ResourceManager manager, Profiler profiler, CallbackInfo info, ImmutableMap.Builder<Identifier, LootTable> tableMap) {
 		Collection<Identifier> ids = manager.findResources("cardstock/packs", path -> path.endsWith(".kdl"));
 		for (Identifier id : ids) {
-			try {
-				Identifier tableId = new Identifier(id.getNamespace(), id.getPath().substring(PREFIX_LENGTH, id.getPath().length() - SUFFIX_LENGTH));
-				KDLDocument doc = PARSER.parse(manager.getResource(id).getInputStream());
+			Identifier tableId = new Identifier(id.getNamespace(), id.getPath().substring(PREFIX_LENGTH, id.getPath().length() - SUFFIX_LENGTH));
+			try (Resource res = manager.method_14486(id)){
+				KDLDocument doc = PARSER.parse(res.getInputStream());
 				CardPack pack = parsePackDoc(tableId, doc);
 				int bonuses = 0;
-				for (CardPack.Bonus bonus : pack.getBonuses()) {
+				for (CardPack.Bonus bonus : pack.bonuses()) {
 					bonuses += bonus.getCount();
 				}
-				if (bonuses > pack.getCardCount()) {
+				if (bonuses > pack.cardCount()) {
 					throw new IllegalArgumentException("Card pack " + tableId + " has more bonuses than drawable cards!");
 				}
-				int rawPulls = pack.getCardCount() - bonuses;
+				int rawPulls = pack.cardCount() - bonuses;
 				LootTable.Builder builder = new LootTable.Builder();
-				FabricLootPoolBuilder mainPool = FabricLootPoolBuilder.builder().rolls(ConstantLootTableRange.create(rawPulls));
-				for (int rarity : pack.getWeights().keySet()) {
-					int weight = pack.getWeights().get(rarity);
-					mainPool.withEntry(ItemEntry.builder(CardStock.CARD).weight(weight).apply(CardPackLootFunction.builder(pack.getSet(), rarity, null)).build());
+				FabricLootPoolBuilder mainPool = FabricLootPoolBuilder.builder().rolls(ConstantLootNumberProvider.create(rawPulls));
+				for (int rarity : pack.weights().keySet()) {
+					int weight = pack.weights().get(rarity);
+					mainPool.withEntry(ItemEntry.builder(CardStock.CARD).weight(weight).apply(CardPackLootFunction.builder(pack.set(), rarity, null)).build());
 				}
 				builder.pool(mainPool);
-				for (CardPack.Bonus bonus : pack.getBonuses()) {
-					FabricLootPoolBuilder pool = FabricLootPoolBuilder.builder().rolls(ConstantLootTableRange.create(bonus.getCount()));
+				for (CardPack.Bonus bonus : pack.bonuses()) {
+					FabricLootPoolBuilder pool = FabricLootPoolBuilder.builder().rolls(ConstantLootNumberProvider.create(bonus.getCount()));
 					pool.withEntry(
 							ItemEntry.builder(CardStock.CARD).apply(CardPackLootFunction.builder(
-									pack.getSet(),
+									pack.set(),
 									bonus.getRarity(),
 									new Pair<>(bonus.getBanner(), bonus.getBannerChance())
 							)).build()
@@ -79,7 +77,7 @@ public class MixinLootManager {
 				//todo: print the table json
 				tableMap.put(tableId, table);
 			} catch(IOException e) {
-				LOGGER.error("Could not open kdl card pack document: " + e.getMessage());
+				CardStock.LOGGER.error("Could not open kdl card pack document: " + e.getMessage());
 			}
 		}
 	}
@@ -99,7 +97,7 @@ public class MixinLootManager {
 					cardCount = flattenToInt(node.getArgs().get(0));
 					break;
 				case "weights":
-					Map<String, KDLValue> props = node.getProps();
+					Map<String, KDLValue<?>> props = node.getProps();
 					if (props.containsKey("r1")) {
 						weights.put(1, flattenToInt(props.get("r1")));
 					}
@@ -121,7 +119,7 @@ public class MixinLootManager {
 						if (child.getIdentifier().equals("rarity")) {
 							int rarity = flattenToInt(child.getArgs().get(0));
 							int count = 1;
-							Map<String, KDLValue> childProps = child.getProps();
+							Map<String, KDLValue<?>> childProps = child.getProps();
 							if (childProps.containsKey("count")) {
 								count = flattenToInt(childProps.get("count"));
 							}
@@ -154,11 +152,11 @@ public class MixinLootManager {
 		return new CardPack(set, cardCount, weights, bonuses);
 	}
 
-	private int flattenToInt(KDLValue val) {
-		return val.getAsNumber().orElse(KDLNumber.from(-1)).getAsBigDecimal().intValue();
+	private int flattenToInt(KDLValue<?> val) {
+		return val.getAsNumber().orElse(KDLNumber.from(-1)).getValue().intValue();
 	}
 
-	private float flattenToFloat(KDLValue val) {
-		return val.getAsNumber().orElse(KDLNumber.from(-1)).getAsBigDecimal().floatValue();
+	private float flattenToFloat(KDLValue<?> val) {
+		return val.getAsNumber().orElse(KDLNumber.from(-1)).getValue().floatValue();
 	}
 }

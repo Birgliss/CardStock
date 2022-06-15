@@ -4,13 +4,15 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinLootManager",
-    "MixinPlayerManager"
+    "MixinPlayerManager",
+    "MixinSlot"
   ],
   "client": [
+    "MixinGameRenderer",
     "MixinHandledScreen",
+    "MixinItemModels",
     "MixinItemRenderer",
     "MixinJsonUnbakedModel",
-    "MixinModelLoader",
-    "MixinScreen"
+    "MixinModelLoader"
   ]
 }
